@@ -4,23 +4,21 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @Entity
-@Table(name ="author")
+@Table(name ="editor")
 @Getter
 @Setter
-public class Author {
+public class Editor {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id_editeur")
-    private int idAuthor;
+    private int idEditeur;
 
-    @Column(name = "last_name")
-    private String last_name;
+    @Column(name = "name")
+    private String name;
 
-    @Column(name = "first_name")
-    private String first_name;
+
 
 
 }
