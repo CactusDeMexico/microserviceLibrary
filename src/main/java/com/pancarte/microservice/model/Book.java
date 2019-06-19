@@ -6,6 +6,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.Set;
 
 @Entity
 @Table(name ="book")
@@ -14,8 +15,8 @@ import java.util.Date;
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id_role")
-    private int idRole;
+    @Column(name = "id_book")
+    private int idBook;
 
     @Column(name = "id_type")
     private int idType;
@@ -47,10 +48,22 @@ public class Book {
     private Date creationDate;
 
 
- @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "update_date")
     private Date updateDate;
 
 
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "book_author", joinColumns = @JoinColumn(name = "id_editeur"), inverseJoinColumns = @JoinColumn(name = "id_book"))
+    private Set<Author> authors;
+
+
+    public Set<Author> getAuthors() {
+        return authors;
+    }
+
+    public void setAuthors(Set<Author> authors) {
+        this.authors = authors;
+    }
 
 }
