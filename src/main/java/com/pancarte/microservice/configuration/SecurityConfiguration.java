@@ -17,7 +17,7 @@ import javax.sql.DataSource;
 @Configuration
 @EnableWebSecurity
 
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -25,51 +25,48 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
     @Autowired
     private DataSource dataSource;
 
-    private final String USERS_QUERY = "select email, password, active from user1 where email=?";
-    private final String ROLES_QUERY = "select u.email, r.role from user1 u inner join user_role ur on (u.iduser = ur.iduser) inner join role r on (ur.idrole=r.idrole) where u.email=?";
+    private final String USERS_QUERY = "select email, password, active from user_account where email=?";
+    private final String ROLES_QUERY = "select u.email, r.role from user_account u inner join user_role ur on (u.id_user = ur.id_user) inner join role r on (ur.id_role=r.id_role) where u.email=?";
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-                 auth.jdbcAuthentication()
+        auth.jdbcAuthentication()
                 .usersByUsernameQuery(USERS_QUERY)
                 .authoritiesByUsernameQuery(ROLES_QUERY)
                 .dataSource(dataSource)
                 .passwordEncoder(bCryptPasswordEncoder);
     }
 
+    //todo:Consulter leurs prêts en cours. Les prêts sont pour une période de 4 semaines.
     @Override
-    protected void configure(HttpSecurity http) throws Exception{
+    protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .antMatchers("/").permitAll()
                 .antMatchers("/publication/**").permitAll()
-                .antMatchers("/search/**").anonymous()
+                .antMatchers("/search/**").permitAll()
+                .antMatchers("/createUser/**").permitAll()
+
                 .antMatchers("/login").permitAll()
-                .antMatchers("/borrowTopo").permitAll()
-                .antMatchers("/signup").permitAll()
-                .antMatchers("/topo").permitAll()
+
                 .antMatchers("/home").permitAll()
                 .antMatchers("/index").permitAll()
                 .antMatchers("/img/*").permitAll()
-                .antMatchers("/bootstrap/**").anonymous()
-                .antMatchers("/css/**").anonymous()
-                .antMatchers("/js/**").anonymous()
-                .antMatchers("/assets/*").anonymous()
-                .antMatchers("/insertPublication").hasAuthority("ADMIN")
-                .antMatchers("/updateVoie").hasAuthority("ADMIN")
-                .antMatchers("/unrent").hasAuthority("ADMIN")
-                .antMatchers("/validateDele").hasAuthority("ADMIN")
-                .antMatchers("/deleCom").hasAuthority("ADMIN")
-                .antMatchers("/rent").hasAuthority("ADMIN")
-                .antMatchers("/borrow").hasAuthority("ADMIN")
-                .antMatchers("/borrowed").hasAuthority("ADMIN")
-                .antMatchers("/loggedhome").hasAuthority("ADMIN")
-                .antMatchers("/test").hasAuthority("ADMIN")
-                .antMatchers("/loggedhome","/test").hasAuthority("ADMIN").anyRequest()
+
+                .antMatchers("/user/**").permitAll()
+
+                .antMatchers("/role/**").permitAll()
+                .antMatchers("/find").permitAll()
+
+                .antMatchers("/getAllBooks").permitAll()
+
+                .antMatchers("/test").anonymous()
+                .antMatchers("/loggedhome").hasAuthority("ADMIN").anyRequest()
 
                 .authenticated().and().csrf().disable()
 
                 .formLogin().loginPage("/login").failureUrl("/login?error=true")
                 .defaultSuccessUrl("/loggedhome")
+
                 .usernameParameter("email")
                 .passwordParameter("password")
                 .and().logout()
@@ -77,10 +74,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
                 .logoutSuccessUrl("/")
                 .and().rememberMe()
                 .tokenRepository(persistentTokenRepository())
-                .tokenValiditySeconds(60*60)
+                .tokenValiditySeconds(60 * 60)
                 .and().exceptionHandling().accessDeniedPage("/access_denied");
     }
-
 
     @Bean
     public PersistentTokenRepository persistentTokenRepository() {

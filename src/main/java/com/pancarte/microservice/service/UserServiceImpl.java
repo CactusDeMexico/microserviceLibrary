@@ -33,6 +33,11 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email);
     }
 
+    @Override
+    public String queryUser() {
+        return queryUser();
+    }
+
     public List<User> findAll(){return  userRepository.findAll();}
 
     @Override

@@ -8,6 +8,7 @@ import java.util.List;
 public interface UserService {
 
     public User findUserByEmail(String email);
+    String queryUser();
 
 
     public void saveUser(User user);

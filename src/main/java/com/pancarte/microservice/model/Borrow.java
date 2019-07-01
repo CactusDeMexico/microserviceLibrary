@@ -4,10 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
@@ -16,6 +13,7 @@ import java.util.Date;
 @Setter
 public class Borrow {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id_borrow")
     private int idBorrow;
 
@@ -25,7 +23,7 @@ public class Borrow {
     @Column(name = "id_user")
     private int idUser;
 
-    @Column(name = "isloan")
+    @Column(name = "is_loan")
     private boolean isLoan;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -36,8 +34,7 @@ public class Borrow {
     @Column(name = "return_date")
     private Date returnDate;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Column(name = "is_Extended")
+    @Column(name = "is_extended")
     private  boolean isExtended;
 
 }

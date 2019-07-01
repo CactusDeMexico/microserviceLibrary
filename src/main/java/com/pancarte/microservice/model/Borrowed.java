@@ -4,10 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
@@ -16,6 +13,7 @@ import java.util.Date;
 @Setter
 public class Borrowed {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id_borrowed")
     private int idBorrowed;
 
