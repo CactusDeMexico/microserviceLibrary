@@ -60,8 +60,7 @@ public class LibraryControleur {
 
     @RequestMapping(value = {"/user"}, method = RequestMethod.GET)
     public String queryUser(@RequestParam("email") String email) {
-        String x = userRepository.queryUser(email);
-        return x;
+        return userRepository.queryUser(email);
     }
 
     @Autowired
