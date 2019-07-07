@@ -107,7 +107,7 @@ create table if not exists user_role
     constraint fklqrhjak9uiiytups744gq095j
       references role,
   constraint user_role_pkey
-    primary key (iduser, idrole)
+    primary key (id_user, id_role)
 );
 
 alter table user_role

@@ -1,16 +1,10 @@
 package com.pancarte.microservice;
 
-import com.pancarte.microservice.controller.EmailController;
-import com.pancarte.microservice.controller.LibraryControleur;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.test.context.ContextConfiguration;
-
 
 @Configuration
 @EnableAutoConfiguration

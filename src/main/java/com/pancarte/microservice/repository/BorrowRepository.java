@@ -1,7 +1,6 @@
 package com.pancarte.microservice.repository;
 
 
-import com.pancarte.microservice.model.Book;
 import com.pancarte.microservice.model.Borrow;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
