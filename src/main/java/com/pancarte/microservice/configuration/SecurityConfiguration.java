@@ -37,7 +37,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .passwordEncoder(bCryptPasswordEncoder);
     }
 
-    //todo:Consulter leurs prêts en cours. Les prêts sont pour une période de 4 semaines.
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
