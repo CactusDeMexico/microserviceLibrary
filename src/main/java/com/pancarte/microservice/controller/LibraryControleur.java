@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import org.springframework.mail.SimpleMailMessage;
+
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
@@ -20,9 +21,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.sql.Date;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
@@ -62,23 +63,28 @@ public class LibraryControleur {
     public String queryUser(@RequestParam("email") String email) {
         return userRepository.queryUser(email);
     }
-
     @Autowired
     private JavaMailSender javaMailSender;
 
 
     @Scheduled(cron = "0/20 * * * * ?")
-    public void sendEmail() throws IOException {
+    public void sendEmail()  {
       List<Borrow>  borrowed = borrowRepository.findAllBorrowBook();
         for (Borrow borrowedBook : borrowed){
-            if((borrowedBook.getReturnDate()).compareTo(java.sql.Date.valueOf( LocalDate.now()))>0){
+            if((java.sql.Date.valueOf( LocalDate.now())).compareTo(borrowedBook.getReturnDate())>0){
                 User user = userRepository.findById(borrowedBook.getIdUser());
                 SimpleMailMessage msg = new SimpleMailMessage();
+                System.out.println(user.getEmail());
                 msg.setTo(user.getEmail());
                 msg.setSubject("Livre à rendre");
-                msg.setText("vous deviez rendre le libre le :"+borrowedBook.getReturnDate()+"\\n Nous vous prions de retourner le livre ");
+                SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+                String date = dateFormat.format(borrowedBook.getReturnDate());
+                msg.setText("vous deviez rendre le livre le :"+date+"\n Nous vous prions de retourner le livre ");
+                System.out.println("email sended");
+                javaMailSender.send(msg);
             }
         }
+
 
 /*
         SimpleMailMessage msg = new SimpleMailMessage();
