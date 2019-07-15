@@ -8,7 +8,6 @@ import com.pancarte.microservice.repository.UserRepository;
 import com.pancarte.microservice.service.BookService;
 import com.pancarte.microservice.service.UserService;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -16,8 +15,6 @@ import org.springframework.mail.SimpleMailMessage;
 
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -30,9 +27,7 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
-
 import java.util.List;
-
 
 @RestController
 public class LibraryControleur {
@@ -43,43 +38,37 @@ public class LibraryControleur {
 
     private final RoleRepository roleRepository;
 
-
-
-
-
-
     @Autowired
-    public LibraryControleur(UserService userService, BookService bookService, @Qualifier("borrowRepository") BorrowRepository borrowRepository, @Qualifier("roleRepository") RoleRepository roleRepository, @Qualifier("userRepository") UserRepository userRepository) {
+    public LibraryControleur(UserService userService, BookService bookService, @Qualifier("borrowRepository") BorrowRepository borrowRepository, @Qualifier("roleRepository") RoleRepository roleRepository, @Qualifier("userRepository") UserRepository userRepository, JavaMailSender javaMailSender) {
 
         this.userRepository = userRepository;
         this.userService = userService;
         this.bookService = bookService;
         this.borrowRepository = borrowRepository;
         this.roleRepository = roleRepository;
+        this.javaMailSender = javaMailSender;
     }
-
 
     @RequestMapping(value = {"/user"}, method = RequestMethod.GET)
     public String queryUser(@RequestParam("email") String email) {
         return userRepository.queryUser(email);
     }
-    @Autowired
-    private JavaMailSender javaMailSender;
 
+    private final JavaMailSender javaMailSender;
 
-    @Scheduled(cron = "0/20 * * * * ?")
-    public void sendEmail()  {
-      List<Borrow>  borrowed = borrowRepository.findAllBorrowBook();
-        for (Borrow borrowedBook : borrowed){
-            if((java.sql.Date.valueOf( LocalDate.now())).compareTo(borrowedBook.getReturnDate())>0){
+    @Scheduled(cron = "0 0 8 * * *")
+    public void sendEmail() {
+        List<Borrow> borrowed = borrowRepository.findAllBorrowBook();
+        for (Borrow borrowedBook : borrowed) {
+            if ((java.sql.Date.valueOf(LocalDate.now())).compareTo(borrowedBook.getReturnDate()) > 0) {
                 User user = userRepository.findById(borrowedBook.getIdUser());
                 SimpleMailMessage msg = new SimpleMailMessage();
-                System.out.println(user.getEmail());
+
                 msg.setTo(user.getEmail());
                 msg.setSubject("Livre à rendre");
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
                 String date = dateFormat.format(borrowedBook.getReturnDate());
-                msg.setText("vous deviez rendre le livre le :"+date+"\n Nous vous prions de retourner le livre ");
+                msg.setText("vous deviez rendre le livre le :" + date + "\n Nous vous prions de retourner le livre ");
                 System.out.println("email sended");
                 javaMailSender.send(msg);
             }
@@ -98,24 +87,18 @@ public class LibraryControleur {
 */
     }
 
-
-
-
     @RequestMapping(value = {"/role"}, method = RequestMethod.GET)
     public String queryRole(@RequestParam("email") String email) {
 
-        System.out.println(roleRepository.queryRole(email));
         return roleRepository.queryRole((email));
     }
 
     @RequestMapping(value = {"/find"}, method = RequestMethod.GET)
     public User findByMail(@RequestParam("email") String email) {
-        System.out.println(userService.findUserByEmail(email));
 
         return userService.findUserByEmail(email);
     }
 
-   
     @RequestMapping(value = {"/createUser"}, method = RequestMethod.GET)
     public void createUser(@RequestParam("lastName") String lastName, @RequestParam("name") String name, @RequestParam("email") String email, @RequestParam("password") String password) {
         User user = new User();
@@ -143,11 +126,10 @@ public class LibraryControleur {
         borrow.setLoan(true);
         borrow.setCreationDate(now);
         LocalDate today = LocalDate.now();
-        System.out.println("Current date: " + today);
+
         //add 4 week to the current date
         LocalDate next4Week = today.plus(4, ChronoUnit.WEEKS);
-        System.out.println("Next week: " + next4Week);
-        System.out.println(java.sql.Date.valueOf(next4Week));
+
         borrow.setReturnDate(java.sql.Date.valueOf(next4Week));
         borrow.setExtended(false);
         borrowRepository.save(borrow);
@@ -155,14 +137,11 @@ public class LibraryControleur {
 
     @RequestMapping(value = {"/extendBorrow"}, method = RequestMethod.GET)
     public void extendBorrow(@RequestParam("idBorrow") int idBorrow) {
-        Date now = Date.valueOf(LocalDate.now());
+
         Borrow borrowed = borrowRepository.findBorrowedBook(idBorrow);
 
-
         LocalDate creationDate = borrowed.getCreationDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        System.out.println("Current date: " + creationDate);
         LocalDate next4Week = creationDate.plus(4, ChronoUnit.WEEKS);
-        System.out.println("Next week: " + next4Week);
         borrowed.setReturnDate(java.sql.Date.valueOf(next4Week));
         borrowed.setExtended(true);
         borrowRepository.save(borrowed);
@@ -171,14 +150,6 @@ public class LibraryControleur {
     @RequestMapping(value = {"/search"})
     public List<Book_List> searchIt(@RequestParam("search") String search) {
 
-        String cap = search.substring(0, 1).toUpperCase() + search.substring(1);
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!auth.getName().equals("anonymousUser")) {
-            System.out.println(auth.getName());
-        } else {
-            System.out.println(auth.getName() + "_________________");
-        }
         List<Book> books = bookService.findByTitle(search);
         List<Book_List> listBook = new ArrayList<>();
         List<Borrow> borrowedBook = borrowRepository.findAllBorrowBook();
@@ -215,8 +186,6 @@ public class LibraryControleur {
                     listedBook.setCreationDate(bookList.getCreationDate());
                     listedBook.setNbCopy(nbCopy);
                     listedBook.setNbCopyAvailable(nbCopy - nbBorrow);
-                    System.out.println(nbBorrow + " hhhhhh");
-                    System.out.println(nbCopy + "nnnn");
 
                     for (Book_List boo : listBook) {
                         if (boo.getTitle().equals(listedBook.getTitle())) {
@@ -233,21 +202,12 @@ public class LibraryControleur {
         return listBook;
     }
 
-
-
     @RequestMapping(value = {"/getAllBooks"})
     public List<Book_List> getAllBooks() {
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!auth.getName().equals("anonymousUser")) {
-            System.out.println(auth.getName());
-        } else {
-            System.out.println(auth.getName() + "_________________");
-        }
         List<Book> books = bookService.findAll();
         List<Book_List> listBook = new ArrayList<>();
         List<Borrow> borrowedBook = borrowRepository.findAllBorrowBook();
-        StringBuilder userb = new StringBuilder();
         int nbCopy = 0;
         int nbBorrow = 0;
         int contain = 0;
@@ -297,6 +257,4 @@ public class LibraryControleur {
 
         return listBook;
     }
-
-
 }

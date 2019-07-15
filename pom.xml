@@ -12,7 +12,8 @@
 	<artifactId>microservice</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>microservice</name>
-	<description>MSA for library</description>
+	<description>api rest library</description>
+    <packaging>jar</packaging>
 
 	<properties>
 		<java.version>1.8</java.version>
@@ -96,6 +97,8 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
+
+
 	</build>
 
 </project>
